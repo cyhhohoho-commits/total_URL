@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이터처리팀 업무 도구</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F4F5F7;
+      --surface: #FFFFFF;
+      --border: #E4E6EA;
+      --border-hover: #C8CBCF;
+      --text-primary: #1A1D23;
+      --text-secondary: #6B7280;
+      --text-tertiary: #9CA3AF;
+      --accent: #1D9E75;
+      --accent-light: #E1F5EE;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 2.5rem 1rem;
+      color: var(--text-primary);
+    }
+
+    .wrap { max-width: 640px; margin: 0 auto; }
+
+    /* HEADER */
+    .header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.4s ease both;
+    }
+    .logo {
+      width: 44px; height: 44px; border-radius: 13px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(29,158,117,0.25);
+    }
+    .logo svg { width: 22px; height: 22px; }
+    .header-text h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+    .header-text p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* SECTION */
+    .section { margin-bottom: 1.5rem; animation: fadeUp 0.4s ease both; }
+    .section:nth-child(2) { animation-delay: 0.05s; }
+    .section:nth-child(3) { animation-delay: 0.10s; }
+    .section:nth-child(4) { animation-delay: 0.15s; }
+
+    .section-label {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .section-label span {
+      font-size: 10.5px; font-weight: 500;
+      color: var(--text-tertiary);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .section-line { flex: 1; height: 1px; background: var(--border); }
+
+    /* GRID */
+    .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+    /* CARD */
+    .card {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 15px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+      position: relative;
+    }
+    .card:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+      transform: translateY(-2px);
+    }
+    .card:hover .arrow { opacity: 1; transform: translateX(2px); }
+    .card.dim { opacity: 0.45; cursor: default; pointer-events: none; }
+
+    .icon-wrap {
+      width: 36px; height: 36px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .icon-wrap svg { width: 17px; height: 17px; }
+    .i-teal   { background: #E1F5EE; }
+    .i-blue   { background: #E6F1FB; }
+    .i-amber  { background: #FEF3C7; }
+    .i-coral  { background: #FAECE7; }
+    .i-purple { background: #EEEDFE; }
+    .i-green  { background: #EAF3DE; }
+
+    .card-body { flex: 1; min-width: 0; }
+    .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+    .card-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .arrow {
+      font-size: 12px; color: var(--text-tertiary);
+      opacity: 0; transition: opacity 0.18s, transform 0.18s;
+    }
+    .card-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+
+    .badge {
+      font-size: 10px; font-weight: 500;
+      padding: 2px 7px; border-radius: 20px;
+      background: var(--accent-light); color: var(--accent);
+      display: inline-block; margin-top: 5px;
+    }
+    .coming {
+      font-size: 10px; font-weight: 400;
+      padding: 2px 7px; border-radius: 20px;
+      background: #F3F4F6; color: var(--text-tertiary);
+      display: inline-block; margin-top: 5px;
+    }
+
+    /* FOOTER */
+    .footer {
+      margin-top: 1.75rem; padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      animation: fadeUp 0.4s 0.2s ease both;
+    }
+    .footer-left { font-size: 11px; color: var(--text-tertiary); }
+    .footer-count {
+      font-size: 11px; color: var(--text-tertiary);
+      background: var(--surface); padding: 3px 10px;
+      border-radius: 20px; border: 1px solid var(--border);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo">
+      <svg viewBox="0 0 22 22" fill="none">
+        <rect x="2" y="2" width="7" height="7" rx="2" fill="white" opacity="0.9"/>
+        <rect x="11" y="2" width="7" height="7" rx="2" fill="white" opacity="0.55"/>
+        <rect x="2" y="11" width="7" height="7" rx="2" fill="white" opacity="0.55"/>
+        <rect x="11" y="11" width="7" height="7" rx="2" fill="white" opacity="0.25"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>데이터처리팀 업무 도구</h1>
+      <p>자주 쓰는 업무 링크 모음 · 계속 업데이트 중</p>
+    </div>
+  </div>
+
+  <!-- 변환 도구 -->
+  <div class="section">
+    <div class="section-label"><span>변환 도구</span><div class="section-line"></div></div>
+    <div class="cards">
+
+      <a class="card" href="https://cyhhohoho-commits.github.io/RD_mp4-converter/" target="_blank">
+        <div class="icon-wrap i-teal">
+          <svg viewBox="0 0 18 18" fill="none">
+            <path d="M4 10.5v4h10v-4" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 2v9M6.5 8.5L9 11l2.5-2.5" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-name">오디오 MP4 변환기</span><span class="arrow">→</span></div>
+          <div class="card-desc">동영상에서 오디오 추출 · MP4 변환</div>
+          <span class="badge">NEW</span>
+        </div>
+      </a>
+
+      <div class="card dim">
+        <div class="icon-wrap i-blue">
+          <svg viewBox="0 0 18 18" fill="none">
+            <rect x="3" y="2" width="9" height="12" rx="1.5" stroke="#185FA5" stroke-width="1.5"/>
+            <path d="M7 6h4M7 9h3" stroke="#185FA5" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M12 9l3 3-3 3" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-name">PDF 변환 도구</span></div>
+          <div class="card-desc">Word · Excel → PDF 빠른 변환</div>
+          <span class="coming">준비 중</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 데이터 처리 -->
+  <div class="section">
+    <div class="section-label"><span>데이터 처리</span><div class="section-line"></div></div>
+    <div class="cards">
+
+      <div class="card dim">
+        <div class="icon-wrap i-amber">
+          <svg viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="10" width="3" height="6" rx="1" fill="#B45309"/>
+            <rect x="7" y="6" width="3" height="10" rx="1" fill="#B45309" opacity="0.65"/>
+            <rect x="12" y="3" width="3" height="13" rx="1" fill="#B45309" opacity="0.35"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-name">SPSS 코드 생성기</span></div>
+          <div class="card-desc">설문 데이터용 SPSS 구문 자동 생성</div>
+          <span class="coming">준비 중</span>
+        </div>
+      </div>
+
+      <div class="card dim">
+        <div class="icon-wrap i-coral">
+          <svg viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="4" width="14" height="2" rx="1" fill="#D85A30" opacity="0.3"/>
+            <rect x="2" y="8" width="10" height="2" rx="1" fill="#D85A30" opacity="0.6"/>
+            <rect x="2" y="12" width="12" height="2" rx="1" fill="#D85A30"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-name">코딩표 정리 도구</span></div>
+          <div class="card-desc">응답 데이터 코딩 작업 보조</div>
+          <span class="coming">준비 중</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 참고 자료 -->
+  <div class="section">
+    <div class="section-label"><span>참고 자료</span><div class="section-line"></div></div>
+    <div class="cards">
+
+      <div class="card dim">
+        <div class="icon-wrap i-purple">
+          <svg viewBox="0 0 18 18" fill="none">
+            <path d="M4 3h7l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="#534AB7" stroke-width="1.5"/>
+            <path d="M11 3v4h4" stroke="#534AB7" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-name">사내 양식 자료실</span></div>
+          <div class="card-desc">보고서 · 각종 양식 템플릿 모음</div>
+          <span class="coming">준비 중</span>
+        </div>
+      </div>
+
+      <div class="card dim">
+        <div class="icon-wrap i-green">
+          <svg viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="6.5" stroke="#3B6D11" stroke-width="1.5"/>
+            <path d="M9 6v4l2.5 2.5" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-name">업무 일정 캘린더</span></div>
+          <div class="card-desc">팀 공용 일정 및 마감일 확인</div>
+          <span class="coming">준비 중</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="footer-left">데이터처리팀 · 2026.05 업데이트</span>
+    <span class="footer-count">링크 1개 · 추가 예정 5개</span>
+  </div>
+
+</div>
+</body>
+</html>
