@@ -345,5 +345,26 @@
   </div>
 
 </div>
+
+<!-- GoatCounter 클릭 집계 (확인 대시보드: https://cyhhohoho.goatcounter.com) -->
+<!-- 허브 페이지 방문 자체는 집계하지 않음(no_onload). 아래 '링크 클릭'만 집계된다. -->
+<script>window.goatcounter = { no_onload: true };</script>
+<script data-goatcounter="https://cyhhohoho.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+<script>
+  // 각 링크 카드 클릭 시 '어떤 도구를 눌렀는지'만 이벤트로 집계.
+  // querySelectorAll('a.card') 이므로 앞으로 카드(링크)가 더 추가돼도 자동으로 잡힌다.
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('a.card').forEach(function (a) {
+      a.addEventListener('click', function () {
+        var el = a.querySelector('.card-name');
+        var name = (el ? el.textContent : a.href).trim();
+        if (window.goatcounter && window.goatcounter.count) {
+          window.goatcounter.count({ path: 'click/' + name, title: name, event: true });
+        }
+      });
+    });
+  });
+</script>
 </body>
 </html>
