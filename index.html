@@ -146,6 +146,62 @@
     @media (max-width: 480px) {
       .cards { grid-template-columns: 1fr; }
     }
+
+    /* ── 의견 버튼 (카드마다 자동 주입) ── */
+    .fb-btn {
+      position: absolute; bottom: 9px; right: 10px;
+      display: inline-flex; align-items: center; gap: 3px;
+      font-family: inherit; font-size: 10px; font-weight: 500; line-height: 1;
+      color: var(--text-tertiary);
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 3px 7px; border-radius: 20px; cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      z-index: 2;
+    }
+    .fb-btn svg { width: 10px; height: 10px; }
+    .fb-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+
+    /* ── 의견 모달 ── */
+    .fb-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      display: none; align-items: center; justify-content: center;
+      padding: 1rem; background: rgba(17,20,26,0.45);
+    }
+    .fb-overlay.open { display: flex; }
+    .fb-modal {
+      background: var(--surface); border-radius: 16px;
+      width: 100%; max-width: 420px; padding: 22px 22px 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      animation: fbUp 0.2s ease both;
+    }
+    @keyframes fbUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .fb-modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+    .fb-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; }
+    .fb-tool { color: var(--accent); font-weight: 600; }
+    .fb-field { margin-bottom: 11px; }
+    .fb-field label { display: block; font-size: 11.5px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; }
+    .fb-field input, .fb-field textarea {
+      width: 100%; font-family: inherit; font-size: 13px; color: var(--text-primary);
+      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+      padding: 9px 11px; outline: none; transition: border-color 0.15s;
+    }
+    .fb-field input:focus, .fb-field textarea:focus { border-color: var(--accent); }
+    .fb-field textarea { resize: vertical; min-height: 96px; line-height: 1.5; }
+    .fb-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .fb-actions button {
+      flex: 1; font-family: inherit; font-size: 13px; font-weight: 500;
+      padding: 10px; border-radius: 9px; cursor: pointer;
+      border: 1px solid var(--border); transition: filter 0.15s, background 0.15s;
+    }
+    .fb-cancel { background: var(--surface); color: var(--text-secondary); }
+    .fb-cancel:hover { background: var(--bg); }
+    .fb-submit { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .fb-submit:hover { filter: brightness(0.95); }
+    .fb-submit:disabled { opacity: 0.6; cursor: default; }
+    .fb-msg { font-size: 12px; margin-top: 10px; text-align: center; display: none; }
+    .fb-msg.ok { color: var(--accent); display: block; }
+    .fb-msg.err { color: #C0392B; display: block; }
+    .fb-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
   </style>
 </head>
 <body>
@@ -377,6 +433,30 @@
 
 </div>
 
+<!-- 의견/수정 요청 모달 (모든 카드가 공유) -->
+<div class="fb-overlay" id="fbOverlay">
+  <div class="fb-modal" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+    <h3 id="fbTitle">의견 · 수정 요청</h3>
+    <div class="fb-sub"><span class="fb-tool" id="fbTool">도구</span> 에 대한 의견을 보내주세요.</div>
+    <form id="fbForm">
+      <input type="text" class="fb-hp" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="fb-field">
+        <label for="fbText">의견 내용</label>
+        <textarea id="fbText" placeholder="개선했으면 하는 점, 오류, 아이디어 등을 자유롭게 적어주세요." required></textarea>
+      </div>
+      <div class="fb-field">
+        <label for="fbName">작성자 (선택)</label>
+        <input type="text" id="fbName" placeholder="이름 / 팀 — 누가 남겼는지 확인용">
+      </div>
+      <div class="fb-actions">
+        <button type="button" class="fb-cancel" id="fbCancel">취소</button>
+        <button type="submit" class="fb-submit" id="fbSubmit">보내기</button>
+      </div>
+      <div class="fb-msg" id="fbMsg"></div>
+    </form>
+  </div>
+</div>
+
 <!-- GoatCounter 집계 (확인 대시보드: https://cyhhohoho.goatcounter.com) -->
 <!-- 허브 접속(페이지뷰) + 아래 링크 클릭을 모두 집계한다. 화면에는 아무것도 표시되지 않으며,
      통계는 위 대시보드에서만 확인한다(허브에 숫자 노출 없음). -->
@@ -396,6 +476,106 @@
       });
     });
   });
+</script>
+
+<!-- 의견/수정 요청 전송 (Web3Forms) -->
+<script>
+  // ▼▼ 설정: 여기에 Web3Forms 액세스 키를 넣으세요. ▼▼
+  //   - 내 메일 1곳만: ["내_키"]
+  //   - 나 + 부서장 둘 다: ["내_키", "부서장_키"]  (부서장 이메일로도 키 하나 더 발급받아 추가)
+  var W3F_KEYS = [
+    "eb0cdeda-b49f-4b62-84e6-a1e69333cb07",  // 최용현
+    "6015fca6-3b43-4277-ad8f-ca289102e2b3"   // 부서장
+  ];
+  // ▲▲ ─────────────────────────────────────── ▲▲
+
+  (function () {
+    var overlay   = document.getElementById('fbOverlay');
+    var toolEl    = document.getElementById('fbTool');
+    var form      = document.getElementById('fbForm');
+    var textEl    = document.getElementById('fbText');
+    var nameEl    = document.getElementById('fbName');
+    var msgEl     = document.getElementById('fbMsg');
+    var submitBtn = document.getElementById('fbSubmit');
+    var currentTool = '';
+
+    function openModal(name) {
+      currentTool = name;
+      toolEl.textContent = name;
+      form.reset();
+      msgEl.className = 'fb-msg'; msgEl.textContent = '';
+      submitBtn.disabled = false; submitBtn.textContent = '보내기';
+      overlay.classList.add('open');
+      setTimeout(function () { textEl.focus(); }, 50);
+    }
+    function closeModal() { overlay.classList.remove('open'); }
+
+    document.getElementById('fbCancel').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+    });
+
+    // 각 카드(준비 중 제외)에 '의견' 버튼을 주입. 앞으로 카드가 추가돼도 자동 적용.
+    document.querySelectorAll('.card').forEach(function (card) {
+      if (card.classList.contains('dim')) return;
+      var el = card.querySelector('.card-name');
+      var name = el ? el.textContent.trim() : '';
+      if (!name) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'fb-btn';
+      btn.setAttribute('aria-label', name + ' 의견 보내기');
+      btn.innerHTML = '<svg viewBox="0 0 14 14" fill="none"><path d="M9.3 2.2l2.5 2.5L5 11.5l-3 .5.5-3 6.8-6.8z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>의견';
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        openModal(name);
+      });
+      card.appendChild(btn);
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!textEl.value.trim()) return;
+      if (!W3F_KEYS.length || W3F_KEYS[0] === 'YOUR_WEB3FORMS_ACCESS_KEY') {
+        msgEl.className = 'fb-msg err';
+        msgEl.textContent = '전송 키가 아직 설정되지 않았습니다. (관리자 설정 필요)';
+        return;
+      }
+      submitBtn.disabled = true; submitBtn.textContent = '보내는 중…';
+      msgEl.className = 'fb-msg'; msgEl.textContent = '';
+      var payload = {
+        subject: '[AX RD업무도구] ' + currentTool,
+        from_name: 'RD 업무도구 허브',
+        '안내': 'RD업무도구에서 온 의견입니다',
+        '도구': currentTool,
+        '의견': textEl.value.trim(),
+        '작성자': nameEl.value.trim() || '(미기재)',
+        botcheck: form.botcheck.value
+      };
+      Promise.all(W3F_KEYS.map(function (key) {
+        var body = JSON.stringify(Object.assign({ access_key: key }, payload));
+        return fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: body
+        }).then(function (r) { return r.json(); });
+      })).then(function (results) {
+        var ok = results.every(function (r) { return r && r.success; });
+        if (!ok) throw new Error('fail');
+        msgEl.className = 'fb-msg ok';
+        msgEl.textContent = '의견이 제출되었습니다. 감사합니다.';
+        if (window.goatcounter && window.goatcounter.count) {
+          window.goatcounter.count({ path: 'feedback/' + currentTool, title: '의견 ' + currentTool, event: true });
+        }
+        setTimeout(closeModal, 1400);
+      }).catch(function () {
+        msgEl.className = 'fb-msg err';
+        msgEl.textContent = '전송에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+        submitBtn.disabled = false; submitBtn.textContent = '보내기';
+      });
+    });
+  })();
 </script>
 </body>
 </html>
